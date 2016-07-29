@@ -1,0 +1,15 @@
+# start the server
+cd ~/Development/hello_phoenix
+iex -S mix phoenix.server
+
+#start postgresql
+
+Assuming you have installed Elixir:
+cd Phoenix\ backend/
+mix deps.get
+mix ecto.create
+mix ecto.migrate
+npm install
+npm install -g brunch
+brunch build
+iex -S mix phoenix.server
