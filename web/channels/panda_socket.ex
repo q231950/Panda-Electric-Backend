@@ -1,8 +1,8 @@
-defmodule HelloPhoenix.UserSocket do
+defmodule HelloPhoenix.PandaSocket do
   use Phoenix.Socket
 
   ## Channels
-  # channel "rooms:*", HelloPhoenix.RoomChannel
+  channel "playground:*", HelloPhoenix.PlaygroundChannel
 
   ## Transports
   transport :websocket, Phoenix.Transports.WebSocket

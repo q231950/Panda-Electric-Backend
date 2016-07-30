@@ -1,7 +1,7 @@
 defmodule HelloPhoenix.Endpoint do
   use Phoenix.Endpoint, otp_app: :hello_phoenix
 
-  socket "/socket", HelloPhoenix.UserSocket
+  socket "/socket", HelloPhoenix.PandaSocket
 
   # Serve at "/" the static files from "priv/static" directory.
   #
