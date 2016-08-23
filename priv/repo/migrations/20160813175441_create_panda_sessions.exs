@@ -3,7 +3,6 @@ defmodule HelloPhoenix.Repo.Migrations.CreatePandaSessions do
 
   def change do
     create table(:panda_sessions) do
-      add :session_id, :string
       add :title, :string
 
       timestamps

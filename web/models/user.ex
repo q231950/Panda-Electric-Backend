@@ -3,6 +3,7 @@ defmodule HelloPhoenix.User do
 
   schema "users" do
     field :name, :string
+    many_to_many :panda_sessions, HelloPhoenix.PandaSession, join_through: "users_panda_sessions"
 
     timestamps
   end
