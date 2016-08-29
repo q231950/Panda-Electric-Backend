@@ -7,10 +7,9 @@ defmodule HelloPhoenix.PlaygroundChannel do
   import Ecto.Query
 
   def join("playground:main", %{"user" => user}, socket) do
-    IO.puts "[Join] #{user}"
+    IO.puts "[Join] name: \"#{user}\""
     user_exists(user)
     |> panda_session_for_user
-    |> IO.inspect
 
     {:ok, socket}
   end
@@ -29,7 +28,7 @@ defmodule HelloPhoenix.PlaygroundChannel do
     users = Repo.all(query)
     user = List.first(users)
     case user do
-      nil -> IO.puts "User with name: \"#{user_name}\" does not exist yet."
+      nil -> IO.puts "[User] no record found for: \"#{user_name}\""
       u -> IO.inspect(user)
     end
     user
@@ -42,7 +41,7 @@ defmodule HelloPhoenix.PlaygroundChannel do
     case panda_session do
       [] -> create_or_join_session(user)
       [s] ->
-        IO.puts "Session for #{user.name}: #{s.title}."
+        IO.puts "[Session] existing session found for #{ user.name }: #{s.title}."
         panda_session
     end
   end
@@ -50,38 +49,33 @@ defmodule HelloPhoenix.PlaygroundChannel do
   defp create_or_join_session(user) do
     case joinable_sessions(user) do
       nil ->
-        IO.puts "it's nil"
+        IO.puts "[Session] none available"
         create_session |> add_user_to_session(user)
       x ->
-        IO.puts "session exists"
+        IO.puts "[Session] found"
         add_user_to_session(x, user)
     end
   end
 
   defp create_session do
-    IO.puts "Create session..."
+    IO.puts "[Session] create session"
     session = %PandaSession{title: "a panda session"}
     session = Repo.insert!(session) |> Repo.preload(:users)
-    IO.inspect session
     session
   end
 
   defp add_user_to_session(session, user) do
-    IO.puts "Adding user to session"
-    # changeset = Ecto.Changeset.change(session) |> Ecto.Changeset.put_assoc(:users, session.users)
-
+    IO.puts "[Session] add user to session: #{ user.name }"
     children_changesets = Enum.map(session.users ++ [user], &Ecto.Changeset.change/1)
     changeset = Ecto.Changeset.put_assoc(Ecto.Changeset.change(session), :users, children_changesets)
-
     result = Repo.update!(changeset)
-    IO.inspect result
     session
   end
 
   defp joinable_sessions(user) do
-    IO.puts "joinable_sessions"
     query = from s in PandaSession, preload: [:users]
     panda_sessions = Repo.all(query)
+    IO.puts "[Session] joinable sessions: #{ Enum.count(panda_sessions) }"
     # find a session with only one user
     panda_session = Enum.find( panda_sessions, fn(s) -> Enum.count(s.users) == 1 end )
     IO.inspect panda_session
