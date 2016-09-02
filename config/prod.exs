@@ -14,7 +14,7 @@ use Mix.Config
 config :hello_phoenix, HelloPhoenix.Endpoint,
   http: [port: {:system, "PORT"}],
   url: [scheme: "https", host: "tranquil-peak-78260.herokuapp.com", port: 443],
-  force_ssl: [rewrite_on: [:x_forwarded_proto]], 
+  force_ssl: [rewrite_on: [:x_forwarded_proto]],
   cache_static_manifest: "priv/static/manifest.json",
   secret_key_base: System.get_env("SECRET_KEY_BASE")
 
@@ -22,7 +22,7 @@ config :hello_phoenix, HelloPhoenix.Endpoint,
 config :hello_phoenix, HelloPhoenix.Repo,
   adapter: Ecto.Adapters.Postgres,
   url: System.get_env("DATABASE_URL"),
-  pool_size: 19
+  pool_size: 10
 
 # Do not print debug messages in production
 config :logger, level: :info
