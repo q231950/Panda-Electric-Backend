@@ -1,4 +1,6 @@
-# HelloPhoenix
+## Panda Electric Backend 
+
+_happens to be a phoenix app_
 
 To start your Phoenix app:
 
