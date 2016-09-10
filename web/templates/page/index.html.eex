@@ -1,6 +1,6 @@
 <div class="jumbotron">
   <h2><%= gettext "%{name} Electric Backend", name: "🐼" %></h2>
-  <p class="lead">A productive web framework that<br />does not compromise speed and maintainability.</p>
+  <p class="lead">Enables devices to talk to each other.</p>
 </div>
 
 <div class="row marketing">
