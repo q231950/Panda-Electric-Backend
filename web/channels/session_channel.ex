@@ -1,4 +1,4 @@
-defmodule HelloPhoenix.SessionChannel do
+defmodule HelloPhoenix.EstimateChannel do
   use Phoenix.Channel
 
   alias HelloPhoenix.PandaSession
