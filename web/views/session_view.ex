@@ -7,7 +7,7 @@ defmodule HelloPhoenix.SessionView do
 
   def render("session.json", %{session: session}) do
     %{
-      id: session.id,
+      uuid: session.uuid,
       title: session.title
      }
   end
