@@ -8,7 +8,9 @@ defmodule HelloPhoenix.SessionController do
   import Ecto.Query
 
   def index(conn, %{"user" => user}) do
-    query = from s in PandaSession, preload: [:users]
+    query = from s in PandaSession, preload: [:users],
+                                    join: user in assoc(s, :users),
+                                    where: user.name == ^user
     sessions = Repo.all(query)
     render conn, sessions: sessions
   end
