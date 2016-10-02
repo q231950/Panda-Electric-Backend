@@ -9,12 +9,12 @@ defmodule HelloPhoenix.EstimateChannel do
 
   def handle_in("new:estimate", %{"fibonacci" => fibonacci}, socket) do
     IO.puts fibonacci
-    broadcast! socket, "new:fibonacci_result", %{result: 233}
+    broadcast! socket, "new:fibonacci_result", %{fibonacci: 233}
     {:noreply, socket}
   end
-  def handle_in("new:estimate", %{"tshirt" => fibonacci}, socket) do
-    IO.puts fibonacci
-    broadcast! socket, "new:tshirt_result", %{result: "XL"}
+  def handle_in("new:estimate", %{"tshirt" => size}, socket) do
+    IO.puts size
+    broadcast! socket, "new:tshirt_result", %{size: "XL"}
     {:noreply, socket}
   end
 end
