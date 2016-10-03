@@ -1,6 +1,9 @@
 defmodule HelloPhoenix.User do
   use HelloPhoenix.Web, :model
 
+  @primary_key {:id, :binary_id, autogenerate: true}
+  @derive {Phoenix.Param, key: :id}
+  
   schema "users" do
     field :name, :string
     many_to_many :panda_sessions, HelloPhoenix.PandaSession, join_through: "users_panda_sessions"

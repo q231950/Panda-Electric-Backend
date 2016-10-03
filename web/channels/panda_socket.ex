@@ -3,7 +3,8 @@ defmodule HelloPhoenix.PandaSocket do
 
   ## Channels
   channel "playground:*", HelloPhoenix.PlaygroundChannel
-  channel "session:*", HelloPhoenix.EstimationChannel
+  channel "estimation:*", HelloPhoenix.EstimationChannel
+  channel "sessions:*", HelloPhoenix.SessionChannel
 
   ## Transports
   transport :websocket, Phoenix.Transports.WebSocket

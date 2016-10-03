@@ -26,7 +26,7 @@ defmodule HelloPhoenix.Router do
   scope "/api", HelloPhoenix do
     pipe_through :api
 
-    resources "/sessions", SessionController
+    resources "/users", UserAPIController
   end
 
   # Other scopes may use custom stacks.
