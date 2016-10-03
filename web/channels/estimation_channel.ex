@@ -1,9 +1,9 @@
-defmodule HelloPhoenix.EstimateChannel do
+defmodule HelloPhoenix.EstimationChannel do
   use Phoenix.Channel
 
   alias HelloPhoenix.PandaSession
 
-  def join("session:" <> session_id, %{"user" => user}, socket) do
+  def join("estimation:" <> session_id, %{"user" => user}, socket) do
     {:ok, socket}
   end
 
