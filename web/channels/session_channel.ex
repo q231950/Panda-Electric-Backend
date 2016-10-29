@@ -19,11 +19,11 @@ defmodule HelloPhoenix.SessionChannel do
                                     join: user in assoc(s, :users),
                                     where: user.id == ^uuid
     sessions = Repo.all(query)
-
-    Enum.map(sessions, fn(session) ->
-      broadcast! socket, "new:session", %{session: %{title: session.title, uuid: session.id}}
+    mapped_sessions = Enum.map(sessions, fn(session) ->
+      %{session: %{title: session.title, uuid: session.id}}
     end )
-    {:noreply, socket}
+
+     {:reply, {:ok, %{ :sessions => mapped_sessions }}, socket}
   end
 
   def handle_in("new:session", %{"user" => uuid, "title" => title}, socket) do
@@ -39,9 +39,29 @@ defmodule HelloPhoenix.SessionChannel do
     add_user_to_session(session, user)
 
     IO.puts "[Session Channel] broadcast session: #{session.id}."
-    broadcast! socket, "new:session", %{session: %{title: session.title, uuid: session.id}}
+    {:reply, {:ok, %{session: %{title: session.title, uuid: session.id}} }, socket}
+  end
 
-    {:noreply, socket}
+  def handle_in("join:session", %{"user" => user_id, "uuid" => uuid}, socket) do
+    query = from u in User, where: u.id == ^user_id
+    users = Repo.all(query)
+    user = List.first(users)
+
+    session_query = from s in PandaSession, where: s.id == ^uuid
+    session = List.first(Repo.all(session_query))
+    add_user_to_session(session, user)
+
+    reply = {:ok, %{session: %{title: session.title, uuid: session.id}}}
+    {:reply, reply, socket}
+  end
+
+  def handle_in("delete:session", %{"user" => user_id, "uuid" => uuid}, socket) do
+    IO.puts "delete session #{user_id}, #{uuid}"
+    {:reply, {:error, %{"reason"=> "not implemented"}}, socket}
+  end
+
+  def handle_in(_anyTopic, _anyPayload, socket) do
+    {:reply, {:error, %{"reason"=> "unmached"}}, socket}
   end
 
   # def index(conn, %{"user" => user}) do
