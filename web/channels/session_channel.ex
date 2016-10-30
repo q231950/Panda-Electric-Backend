@@ -50,7 +50,8 @@ defmodule HelloPhoenix.SessionChannel do
     IO.puts "[Session Channel] joining user is #{user.name}."
 
     session_query = from s in PandaSession, where: s.id == ^uuid
-    session = List.first(Repo.all(session_query))
+    sessions = Repo.all(session_query) |> Repo.preload(:users)
+    session = List.first(sessions)
     IO.puts "[Session Channel] session to join is #{session.title}."
 
     add_user_to_session(session, user)
