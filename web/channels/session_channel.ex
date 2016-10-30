@@ -43,12 +43,16 @@ defmodule HelloPhoenix.SessionChannel do
   end
 
   def handle_in("join:session", %{"user" => user_id, "uuid" => uuid}, socket) do
+    IO.puts "[Session Channel] join session: #{uuid} user: #{user_id}."
     query = from u in User, where: u.id == ^user_id
     users = Repo.all(query)
     user = List.first(users)
+    IO.puts "[Session Channel] joining user is #{user.name}."
 
     session_query = from s in PandaSession, where: s.id == ^uuid
     session = List.first(Repo.all(session_query))
+    IO.puts "[Session Channel] session to join is #{session.title}."
+
     add_user_to_session(session, user)
 
     reply = {:ok, %{session: %{title: session.title, uuid: session.id}}}
@@ -63,32 +67,6 @@ defmodule HelloPhoenix.SessionChannel do
   def handle_in(_anyTopic, _anyPayload, socket) do
     {:reply, {:error, %{"reason"=> "unmached"}}, socket}
   end
-
-  # def index(conn, %{"user" => user}) do
-  #   query = from s in PandaSession, preload: [:users],
-  #                                   join: user in assoc(s, :users),
-  #                                   where: user.name == ^user
-  #   sessions = Repo.all(query)
-  #   render conn, sessions: sessions
-  # end
-
-
-  # def create(conn, %{"user" => %{"id" => user_id}, "session" => %{ "title" => title } }) do
-  #   IO.puts "create session #{user_id}, #{title}"
-  #
-  #   query = from u in User, where: u.name == ^user_id
-  #   users = Repo.all(query)
-  #   user = List.first(users)
-  #
-  #   session = create_session title
-  #   add_user_to_session(session, user)
-  #
-  #   # query = from s in PandaSession, preload: [:users]
-  #   # sessions = Repo.all(query)
-  #   conn
-  #   |> put_status(200)
-  #   |> render("session.json", session: session)
-  # end
 
   defp create_session(title) do
     IO.puts "[Session Channel] create session with title \"#{title}\""
