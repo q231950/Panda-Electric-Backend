@@ -20,7 +20,7 @@ defmodule HelloPhoenix.SessionChannel do
                                     where: user.id == ^uuid
     sessions = Repo.all(query)
     mapped_sessions = Enum.map(sessions, fn(session) ->
-      %{session: %{title: session.title, uuid: session.id}}
+      %{session: %{title: session.title, uuid: session.id, estimates: []}}
     end )
 
      {:reply, {:ok, %{ :sessions => mapped_sessions }}, socket}
