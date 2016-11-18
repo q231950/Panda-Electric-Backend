@@ -30,13 +30,13 @@ defmodule HelloPhoenix.EstimationChannel do
     IO.puts "[Estimation Channel] New estimation(fibonacci) #{fibonacci} from user #{user_id} in session #{socket.assigns[:session_uuid]}"
     IO.inspect socket.assigns
 
-    broadcast! socket, "new:fibonacci_result", %{fibonacci: fibonacci}
+    broadcast! socket, "new:estimate", %{kind: :fibonacci, value: fibonacci}
 
     {:noreply, socket}
   end
   def handle_in("new:estimate", %{"tshirt" => size}, socket) do
     IO.puts size
-    broadcast! socket, "new:tshirt_result", %{size: size}
+    broadcast! socket, "new:estimate", %{kind: :tshirt, value: size}
     {:noreply, socket}
   end
 end
