@@ -19,4 +19,8 @@ defmodule HelloPhoenix.PandaSession do
     model
     |> cast(params, @required_fields, @optional_fields)
   end
+
+  def with_estimates_and_users(query) do
+    from q in query, preload: [:estimates, :users]
+  end
 end

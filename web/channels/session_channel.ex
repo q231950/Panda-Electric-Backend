@@ -18,12 +18,12 @@ defmodule HelloPhoenix.SessionChannel do
     IO.puts "[Session Channel] request sessions for user #{uuid}."
     query = from s in PandaSession, preload: [:users, :estimates],
                                     join: user in assoc(s, :users),
-                                    join: estimate in assoc(s, :estimates),
-                                    where: user.id == ^uuid and estimate.panda_session_id == s.id
+                                    where: user.id == ^uuid
 
     sessions = Repo.all(query)
     mapped_sessions = Enum.map(sessions, fn(session) ->
       estimates = Enum.map(session.estimates, fn(estimate) ->
+        IO.puts "[Session Channel] estimate #{estimate.id} for session #{session.id}."
         %{estimate: %{kind: estimate.kind, value: estimate.value, uuid: estimate.id }}
       end)
 
@@ -45,10 +45,13 @@ defmodule HelloPhoenix.SessionChannel do
     session = create_session(title)
     add_user_to_session(session, user)
 
-    Repo.preload(session, :estimates)
-    IO.puts "[Session Channel] broadcast session: #{session.id} #{ session.estimates }."
+    session = PandaSession
+    |> PandaSession.with_estimates_and_users
+    |> Repo.get!(session.id)
+    IO.puts "[Session Channel] broadcast session: #{session.id}."
 
     estimates = Enum.map(session.estimates, fn(estimate) ->
+      IO.puts "[Session Channel] estimate for session: #{session.id}."
       %{estimate: %{kind: estimate.kind, value: estimate.value, uuid: estimate.id }}
     end)
 
@@ -65,11 +68,16 @@ defmodule HelloPhoenix.SessionChannel do
     session_query = from s in PandaSession, where: s.id == ^uuid
     sessions = Repo.all(session_query) |> Repo.preload([:users, :estimates])
     session = List.first(sessions)
-    IO.puts "[Session Channel] session to join is #{session.title} #{ session.estimates }."
+
+    estimates = Enum.map(session.estimates, fn(estimate) ->
+      %{estimate: %{kind: estimate.kind, value: estimate.value, uuid: estimate.id }}
+    end)
+
+    IO.puts "[Session Channel] session to join is #{session.title}."
 
     add_user_to_session(session, user)
 
-    reply = {:ok, %{session: %{title: session.title, uuid: session.id}}}
+    reply = {:ok, %{session: %{title: session.title, uuid: session.id, estimates: estimates }}}
     {:reply, reply, socket}
   end
 
