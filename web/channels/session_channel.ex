@@ -40,7 +40,7 @@ defmodule HelloPhoenix.SessionChannel do
     |> PandaSession.with_estimates_and_users
     |> Repo.get!(session.id)
 
-    {:reply, {:ok, %{session: %{title: session.title, uuid: session.id, estimates: session.estimates }} }, socket}
+    {:reply, {:ok, %{ :session => session }}, socket}
   end
 
   def handle_in("join:session", %{"user" => user_id, "uuid" => uuid}, socket) do

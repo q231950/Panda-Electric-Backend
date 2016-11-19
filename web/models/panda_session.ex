@@ -21,7 +21,7 @@ defmodule HelloPhoenix.PandaSession do
   end
 
   def with_estimates_and_users(query) do
-    from q in query, preload: [:estimates, :users]
+    from q in query, preload: [:users, estimates: [:user]]
   end
 end
 
