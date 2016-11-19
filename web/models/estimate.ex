@@ -18,5 +18,12 @@ defmodule HelloPhoenix.Estimate do
     model
     |> cast(params, @required_fields, @optional_fields)
   end
+end
 
+defimpl Poison.Encoder, for: HelloPhoenix.Estimate do
+  def encode(model, opts) do
+    model
+      |> Map.take([:kind, :value, :id, :user])
+      |> Poison.Encoder.encode(opts)
+  end
 end

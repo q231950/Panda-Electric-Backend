@@ -24,3 +24,11 @@ defmodule HelloPhoenix.PandaSession do
     from q in query, preload: [:estimates, :users]
   end
 end
+
+defimpl Poison.Encoder, for: HelloPhoenix.PandaSession do
+  def encode(model, opts) do
+    model
+      |> Map.take([:title, :estimates, :id, :users])
+      |> Poison.Encoder.encode(opts)
+  end
+end

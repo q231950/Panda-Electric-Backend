@@ -26,3 +26,11 @@ defmodule HelloPhoenix.User do
     |> cast(params, @required_fields, @optional_fields)
   end
 end
+
+defimpl Poison.Encoder, for: HelloPhoenix.User do
+  def encode(model, opts) do
+    model
+      |> Map.take([:name, :id])
+      |> Poison.Encoder.encode(opts)
+  end
+end

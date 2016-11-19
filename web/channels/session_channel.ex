@@ -16,21 +16,14 @@ defmodule HelloPhoenix.SessionChannel do
 
   def handle_in("read:sessions", %{"user" => uuid}, socket) do
     IO.puts "[Session Channel] request sessions for user #{uuid}."
-    query = from s in PandaSession, preload: [:users, :estimates],
+
+    query = from s in PandaSession, preload: [:users, estimates: [:user]],
                                     join: user in assoc(s, :users),
                                     where: user.id == ^uuid
 
     sessions = Repo.all(query)
-    mapped_sessions = Enum.map(sessions, fn(session) ->
-      estimates = Enum.map(session.estimates, fn(estimate) ->
-        IO.puts "[Session Channel] estimate #{estimate.id} for session #{session.id}."
-        %{estimate: %{kind: estimate.kind, value: estimate.value, uuid: estimate.id }}
-      end)
 
-      %{session: %{title: session.title, uuid: session.id, estimates: estimates }}
-    end )
-
-     {:reply, {:ok, %{ :sessions => mapped_sessions }}, socket}
+     {:reply, {:ok, %{ :sessions => sessions }}, socket}
   end
 
   def handle_in("new:session", %{"user" => uuid, "title" => title}, socket) do
@@ -40,40 +33,30 @@ defmodule HelloPhoenix.SessionChannel do
     users = Repo.all(query)
     user = List.first(users)
 
-    IO.puts "[Session Channel] user name: #{user.name}."
-
     session = create_session(title)
     add_user_to_session(session, user)
 
     session = PandaSession
     |> PandaSession.with_estimates_and_users
     |> Repo.get!(session.id)
-    IO.puts "[Session Channel] broadcast session: #{session.id}."
 
-    estimates = Enum.map(session.estimates, fn(estimate) ->
-      IO.puts "[Session Channel] estimate for session: #{session.id}."
-      %{estimate: %{kind: estimate.kind, value: estimate.value, uuid: estimate.id }}
-    end)
-
-    {:reply, {:ok, %{session: %{title: session.title, uuid: session.id, estimates: estimates }} }, socket}
+    {:reply, {:ok, %{session: %{title: session.title, uuid: session.id, estimates: session.estimates }} }, socket}
   end
 
   def handle_in("join:session", %{"user" => user_id, "uuid" => uuid}, socket) do
-    IO.puts "[Session Channel] join session: #{uuid} user: #{user_id}."
-    query = from u in User, where: u.id == ^user_id
-    users = Repo.all(query)
-    user = List.first(users)
-    IO.puts "[Session Channel] joining user is #{user.name}."
-
     session_query = from s in PandaSession, where: s.id == ^uuid
     sessions = Repo.all(session_query) |> Repo.preload([:users, :estimates])
     session = List.first(sessions)
 
+    query = from u in User, where: u.id == ^user_id
+    users = Repo.all(query)
+    user = List.first(users)
+
+    IO.puts "[Session Channel] #{ user.name } (#{ user_id }) joins session #{ session.title }."
+
     estimates = Enum.map(session.estimates, fn(estimate) ->
       %{estimate: %{kind: estimate.kind, value: estimate.value, uuid: estimate.id }}
     end)
-
-    IO.puts "[Session Channel] session to join is #{session.title}."
 
     add_user_to_session(session, user)
 
