@@ -5,6 +5,7 @@ defmodule HelloPhoenix.SessionChannel do
   alias HelloPhoenix.PandaSession
   alias HelloPhoenix.User
   alias HelloPhoenix.PandaSessionUser
+  alias HelloPhoenix.Estimate
 
   import Ecto.Query
 
@@ -15,12 +16,18 @@ defmodule HelloPhoenix.SessionChannel do
 
   def handle_in("read:sessions", %{"user" => uuid}, socket) do
     IO.puts "[Session Channel] request sessions for user #{uuid}."
-    query = from s in PandaSession, preload: [:users],
+    query = from s in PandaSession, preload: [:users, :estimates],
                                     join: user in assoc(s, :users),
-                                    where: user.id == ^uuid
+                                    join: estimate in assoc(s, :estimates),
+                                    where: user.id == ^uuid and estimate.panda_session_id == s.id
+
     sessions = Repo.all(query)
     mapped_sessions = Enum.map(sessions, fn(session) ->
-      %{session: %{title: session.title, uuid: session.id, estimates: []}}
+      estimates = Enum.map(session.estimates, fn(estimate) ->
+        %{estimate: %{kind: estimate.kind, value: estimate.value, uuid: estimate.id }}
+      end)
+
+      %{session: %{title: session.title, uuid: session.id, estimates: estimates }}
     end )
 
      {:reply, {:ok, %{ :sessions => mapped_sessions }}, socket}
@@ -38,8 +45,14 @@ defmodule HelloPhoenix.SessionChannel do
     session = create_session(title)
     add_user_to_session(session, user)
 
-    IO.puts "[Session Channel] broadcast session: #{session.id}."
-    {:reply, {:ok, %{session: %{title: session.title, uuid: session.id}} }, socket}
+    Repo.preload(session, :estimates)
+    IO.puts "[Session Channel] broadcast session: #{session.id} #{ session.estimates }."
+
+    estimates = Enum.map(session.estimates, fn(estimate) ->
+      %{estimate: %{kind: estimate.kind, value: estimate.value, uuid: estimate.id }}
+    end)
+
+    {:reply, {:ok, %{session: %{title: session.title, uuid: session.id, estimates: estimates }} }, socket}
   end
 
   def handle_in("join:session", %{"user" => user_id, "uuid" => uuid}, socket) do
@@ -50,9 +63,9 @@ defmodule HelloPhoenix.SessionChannel do
     IO.puts "[Session Channel] joining user is #{user.name}."
 
     session_query = from s in PandaSession, where: s.id == ^uuid
-    sessions = Repo.all(session_query) |> Repo.preload(:users)
+    sessions = Repo.all(session_query) |> Repo.preload([:users, :estimates])
     session = List.first(sessions)
-    IO.puts "[Session Channel] session to join is #{session.title}."
+    IO.puts "[Session Channel] session to join is #{session.title} #{ session.estimates }."
 
     add_user_to_session(session, user)
 
@@ -72,15 +85,23 @@ defmodule HelloPhoenix.SessionChannel do
   defp create_session(title) do
     IO.puts "[Session Channel] create session with title \"#{title}\""
     session = %PandaSession{title: title}
-    session = Repo.insert!(session) |> Repo.preload(:users)
+    session = Repo.insert!(session) |> Repo.preload([:users, :estimates])
     session
   end
 
   defp add_user_to_session(session, user) do
     IO.puts "[Session Channel] add user: #{ user.id } to session: #{session.id}"
     children_changesets = Enum.map(session.users ++ [user], &Ecto.Changeset.change/1)
-    changeset = Ecto.Changeset.put_assoc(Ecto.Changeset.change(session), :users, children_changesets)
-    result = Repo.update!(changeset)
+    Ecto.Changeset.put_assoc(Ecto.Changeset.change(session), :users, children_changesets)
+
+    estimate = %Estimate{user: user, panda_session: session}
+    Repo.insert!(estimate)
+
+    estimate_changesets = Enum.map(session.estimates ++ [estimate], &Ecto.Changeset.change/1)
+
+    estimate_changeset = Ecto.Changeset.put_assoc(Ecto.Changeset.change(session), :users, children_changesets)
+    Repo.update!(estimate_changeset)
+
     session
   end
 end

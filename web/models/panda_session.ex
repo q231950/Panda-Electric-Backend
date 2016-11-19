@@ -3,10 +3,11 @@ defmodule HelloPhoenix.PandaSession do
 
   @primary_key {:id, :binary_id, autogenerate: true}
   @derive {Phoenix.Param, key: :id}
-  
+
   schema "panda_sessions" do
     field :title, :string
     many_to_many :users, HelloPhoenix.User, join_through: "users_panda_sessions"
+    has_many :estimates, HelloPhoenix.Estimate
 
     timestamps
   end
