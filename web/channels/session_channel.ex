@@ -82,15 +82,14 @@ defmodule HelloPhoenix.SessionChannel do
 
   defp add_user_to_session(session, user) do
     IO.puts "[Session Channel] add user: #{ user.id } to session: #{session.id}"
-    children_changesets = Enum.map(session.users ++ [user], &Ecto.Changeset.change/1)
-    Ecto.Changeset.put_assoc(Ecto.Changeset.change(session), :users, children_changesets)
+    users_changes = Enum.map(session.users ++ [user], &Ecto.Changeset.change/1)
+    Ecto.Changeset.put_assoc(Ecto.Changeset.change(session), :users, users_changes)
 
     estimate = %Estimate{user: user, panda_session: session}
     Repo.insert!(estimate)
 
-    estimate_changesets = Enum.map(session.estimates ++ [estimate], &Ecto.Changeset.change/1)
-
-    estimate_changeset = Ecto.Changeset.put_assoc(Ecto.Changeset.change(session), :users, children_changesets)
+    estimates_changes = Enum.map(session.estimates ++ [estimate], &Ecto.Changeset.change/1)
+    estimate_changeset = Ecto.Changeset.put_assoc(Ecto.Changeset.change(session), :users, estimates_changes)
     Repo.update!(estimate_changeset)
 
     session
