@@ -20,10 +20,12 @@ defmodule HelloPhoenix.SessionChannel do
     query = from s in PandaSession, preload: [:users, estimates: [:user]],
                                     join: user in assoc(s, :users),
                                     where: user.id == ^uuid
+    Repo.all(query)
+     |> socket_sessions_reply(socket)
+  end
 
-    sessions = Repo.all(query)
-
-     {:reply, {:ok, %{ :sessions => sessions }}, socket}
+  defp socket_sessions_reply(sessions, socket) do
+    {:reply, {:ok, %{ :sessions => sessions }}, socket}
   end
 
   def handle_in("new:session", %{"user" => uuid, "title" => title}, socket) do
@@ -68,9 +70,9 @@ defmodule HelloPhoenix.SessionChannel do
 
   defp create_session(title) do
     IO.puts "[Session Channel] create session with title \"#{title}\""
-    session = %PandaSession{title: title}
-    session = Repo.insert!(session) |> Repo.preload([:users, estimates: [:user]])
-    session
+    %PandaSession{title: title}
+    |> Repo.insert!
+    |> Repo.preload([:users, estimates: [:user]])
   end
 
   defp add_user_to_session(session, user) do
@@ -84,8 +86,9 @@ defmodule HelloPhoenix.SessionChannel do
   end
 
   defp add_estimate_to_user_session(session, user) do
-    estimate = %Estimate{user: user, panda_session: session}
-    Repo.insert!(estimate) |> Repo.preload(:user)
+    %Estimate{user: user, panda_session: session}
+    |> Repo.insert!
+    |> Repo.preload(:user)
     session
   end
 end
