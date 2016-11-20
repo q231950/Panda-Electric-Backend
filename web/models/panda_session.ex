@@ -19,10 +19,6 @@ defmodule HelloPhoenix.PandaSession do
     model
     |> cast(params, @required_fields, @optional_fields)
   end
-
-  def with_estimates_and_users(query) do
-    from q in query, preload: [:users, estimates: [:user]]
-  end
 end
 
 defimpl Poison.Encoder, for: HelloPhoenix.PandaSession do

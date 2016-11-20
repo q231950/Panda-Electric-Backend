@@ -13,9 +13,6 @@ defmodule HelloPhoenix.UserAPIController do
 
   def create(conn, %{"user" => %{"name" => name} }) do
     user = create_user name
-
-    # query = from s in PandaSession, preload: [:users]
-    # sessions = Repo.all(query)
     conn
     |> put_status(200)
     |> render("user.json", user: user)

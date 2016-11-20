@@ -3,7 +3,7 @@ defmodule HelloPhoenix.UserAPIView do
 
   def render("user.json", %{user: user}) do
     %{
-      uuid: user.id,
+      id: user.id,
       name: user.name
      }
   end
